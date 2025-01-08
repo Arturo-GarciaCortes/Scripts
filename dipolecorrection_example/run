@@ -1,0 +1,103 @@
+#!/bin/bash
+
+for x in 0.1 0.2 0.3 0.4 0.5 0.6; do
+
+mkdir $x
+cd $x
+
+
+A=$(awk "BEGIN {print 1.0-($x)/2}")
+echo $f
+B=$(awk "BEGIN {print ($x)/2}")
+
+cat > scf_$x.in << EOF
+&CONTROL
+ calculation = 'scf'
+ prefix='mgo',
+ pseudo_dir = '../pseudo/',
+ outdir='./'
+ wf_collect=.true.
+ verbosity='high'
+ tefield      = .true.
+ dipfield     = .true.
+ nstep = 500
+/
+&SYSTEM
+  ibrav = 6
+  celldm(1) =7.72047608
+  celldm(3) =6
+  nat = 10
+  ntyp = 3
+  occupations = 'smearing'
+  degauss     = 0.0035
+  ecutwfc     = 120
+  eamp        = 0.0
+  edir        = 3
+  emaxpos     = $A
+  eopreg      = $B
+  !vdw_corr    ='grimme-d3'
+/
+&ELECTRONS
+ diago_full_acc=.true.
+ conv_thr=1e-12
+ electron_maxstep = 300
+/
+&IONS
+ ion_dynamics='bfgs'
+  trust_radius_min=1e-5
+/
+ATOMIC_SPECIES
+  Ag  107.86820  Ag-ONCV.UPF
+  Mg   24.30500  Mg-ONCV.UPF
+   O   15.99900  O-ONCV.UPF
+ATOMIC_POSITIONS (angstrom)
+ Ag      0.0000000000     0.0000000000     8.0000000000
+ Ag      2.0427491850     2.0427491850     8.0000000000
+ Ag      2.0427491850     0.0000000000     9.9707562160
+ Ag      0.0000000000     2.0427491850     9.9707603830
+ Ag      0.0000003920     0.0000009070     12.0023046480
+ Ag      2.0427490630     2.0427496840     12.0022872680
+  O     -0.0000018100     0.0000011970     14.6131407560
+ Mg      2.0427480500     0.0000002450     14.6600091520
+ Mg     -0.0000013280     2.0427499290     14.6600180010
+  O      2.0427478130     2.0427497490     14.6130973430
+K_POINTS automatic
+ 7 7 1 0 0 0
+EOF
+
+cat > pp.in << EOF
+&INPUTPP
+    prefix='mgo',
+    outdir='./tmp' 
+    filplot='pot.dat'
+    plot_num =11
+/
+EOF
+
+cat > average.in << EOF
+1
+pot.dat
+1.0
+3000
+3
+3.00000
+EOF
+
+
+cat > run.pbs << EOF
+
+#!/bin/bash
+#PBS ....
+
+mpirun -np \$NPROCS pw.x -nk 1 <scf_$x.in >& scf_$x.out
+pp.x <pp.in
+average.x <average.in
+
+EOF
+
+qsub run.pbs
+
+cd ..
+
+done
+

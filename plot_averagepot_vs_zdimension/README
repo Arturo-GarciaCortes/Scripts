@@ -1,0 +1,12 @@
+This folder contains the files for making the necessary plots according to the tutorial: Dipole Correction in Quantum Espresso Part 1
+
+ - Note: Use all the commands and scripts in the directory where the pw.x (scf) output files were generated (there must be the .save/ and .xml files)
+ - Note two: None of the programs utilized (pp.x or average.x) can be run with parallel options
+
+Instructions: 
+ 1. Run a scf calculation (k=gamma only if desired) of the slab in order to obtain the electrostatic potential
+ 2. Create an empty tmp directory in the same folder where the pw.x job was done
+ 3. Run the "plot.in" file by using the pp.x program
+    - this will generate a pot.dat file in the tmp/ directory you previously created
+ 4. Run the "avg.in" file by using average.x program
+ 5. Plot the data stored in the avg.dat file by using the python script "potential_vs_zdimension.py"
