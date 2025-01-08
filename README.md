@@ -1,2 +1,2 @@
 # Scripts
-Scripts useful for quantum chemistry calculations
+Useful scripts and jupyter notebooks for quantum chemistry calculations
