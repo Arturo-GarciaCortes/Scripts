@@ -1,0 +1,16 @@
+&INPUTPP
+    prefix='', 
+    outdir='.' 
+    filplot='tmp/plot.dat'
+    plot_num=0
+/
+
+&PLOT
+    iflag=1,
+    output_format=0
+    fileout='file_name.txt'
+    e1(1)=0.0,e1(2)=0.0,e1(3)=18.959,
+    x0(1)=0.0,x0(2)=0.0,x0(3)=0.0,
+    nx=604
+/
+

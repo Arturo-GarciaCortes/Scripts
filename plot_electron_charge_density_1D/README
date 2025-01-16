@@ -1,0 +1,47 @@
+This directory contains the necessary files to plot the electron charge density of a system in 1 dimension (either x,y,z) using the Quantum ESPRESSO post-processing tool pp.x and python3.
+
+There are 2 steps to follow in order to obtain the plot:
+	(1) Use the plot.in 
+	(2) Use the python script to plot the data generated using the plot.in file
+
+STEP 1: plot.in file
+This file uses the post-processing tool of Quantum ESPRESSO to compute the electron charge density (rho) that can be then ploted or displayed using other software or scripts.
+
+&INPUTPP section 
+- We need to specify the prefix of the calculation and the oudir. Note: the prefix must be the same as the prefix used to generate the .save output directory and .xml file 
+- We have to set the variable plot_num = 0, as it indicates that we want to pp.x to compute rho
+- Then, the computed quantity (in this case the charge density) will be stored in filplot. We can set the variable filplot with any name and termination .dat. We recommend to create the filplot file in a tmp directory
+
+&PLOT section
+- The variable iflag indicates the dimensions of the electron charge density plot. By setting iflag=0 we'll obtain the 1D plot
+- We specify the name of the filw to which the plot is written trough the fileout variable. For 1D plots, save the plot in a filename.txt file 
+- Variables e1(1),e1(2),e1(3) determine a 3D vector which determines the plotting line (in alat units). In ohter words, they speficy the direction along which rho is going to be plotted. As we are plottning in 1D, this vector can have the following forms:
+
+	* e1(1)=a_max,e1(2)=0.0,e1(3)=0.0 -> To plot the electron charge density along the x-direction
+        * e1(1)=0.0,e1(2)=b_max,e1(3)=0.0 -> To plot the electron charge density along the y-direction
+        * e1(1)=0.0,e1(2)=0.0,e1(3)=c_max -> To plot the electron charge density along the z-direction
+
+Note: values a_max, b_max and c_max are in alat units, and they represent the max values of the sumilation cell that will me mapped to compute the electron charge density. In other words, they are going to be the x-axis max limits of the plot in alat units. 
+
+- Variables x0(1)=0.0,x0(2)=0.0,x0(3)=0.0 specify another 3D vector, that represent the origin of the line (in alat units). Depending on the direction we are plotting the charge density, this vector can have the forms:
+
+	* x0(1)=a_min,x0(2)=0.0,x0(3)=0.0 -> When plotting rho along the x-direction
+	* x0(1)=0.0,x0(2)=b_min,x0(3)=0.0 -> When plotting rho along the y-direction
+	* x0(1)=0.0,x0(2)=0.0,x0(3)=c_min -> When plotting rho along the z-direction
+
+Note: This vector represents the point from which the electron charge density starts to be computed. In this light, a_min, b_min, c_min are going to be the x-axis min limits of the plot in alat units.
+  
+- Finally, we need to set the nx parameter, which states for the number of data points that will be consider. A higher nx value will lead to a more accurate plot
+
+- Once we already set the plot.in file, we need to run it using the pp.x program trough the following command:
+pp.x -inp plot.in > plot.out
+
+For further information about the variables of the plot.in file as well as for other capabilities of pp.x, see: https://www.quantum-espresso.org/Doc/INPUT_PP.html#idm22 
+
+STEP 2: Python script to plot the data
+This script uses python3 to retrieve and plot the calculated data from the .txt file.
+
+- First we need to specify the path and name of the .txt file containing the data
+- Second, we adjust accordingly the min and max values of the x-axis of the plot by setting: plt.xlim(i_min, i_max), with i=a,b,c for rho along x,y,z dimensions, respectively.
+
+ 
