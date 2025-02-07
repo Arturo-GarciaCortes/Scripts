@@ -1,0 +1,5 @@
+This directory contains files to fix certain atoms in a structure for a Quantum ESPRESSO relax, vc-relax or MD calculation. 
+
+The range should be specified along the z-direction, so that if the z-coordinate of an atom is inside the range it will be fixed during the relaxation of the structure.
+
+This code is useful mainly for slab relaxations, in order to fix certain layers of the model.   
