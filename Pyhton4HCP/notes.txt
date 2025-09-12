@@ -1,0 +1,68 @@
+Python for HPC: September 9th, 2025
+Dr. Andrea Zonca, Computational Scientist, SDSC
+
+Github Repo: https://github.com/zonca/python_hpc_2025 
+
+- All recorded SDSC sessions have been posted: https://www.sdsc.edu/education/on-demand-learning/index.html
+
+----- NOTES -----
+
+-- Introduction --
+
+- The speaker is running in EXPANSE
+
+- How to Set Up a python environment in HPC clusters and use it.-
+	- Galyleo: package that helps to execute jupyter notebooks in HPC clusters. In the repository is a launch_galyleo.sh file that helps to start a jupyter notebook in EXPANSE (execute it as bash script, then it will display a link and then by clicking in that link we'll be signing in jupyter-EXPANSE).
+	- To run python scripts using HPC capabilities (parallel execution): use files within 0_python_condaenv_scratch:
+	- stage_condaenv.sh: it sets a conda environment
+	- .slurm: specify the name and details of the python code and how many cores we want to use
+	
+- Speaker recommends to use AI-code assistance to review code.
+	- There is a guide to setting up AI code assistance for python development (2_ai_code_assist). 
+	- The assistance is integrated within a jupyetr notebook. 
+
+- Other tips:
+	- First develop code locally and then run it in the supercomputer (github helps for this). 
+	- Jupyter notebooks only run in one node always. What we can do is to use jupyter notebooks to coordinate the job using Dask and make interactive distributing computing.  
+	
+--- Threads vs Processes ---
+
+- For a clearer explanation about threads and processes see the jupyter notebook: threads_vs_processes
+- Threads allow for multi-execution
+- Processes only one. However, it is also to do multi-processes.
+
+- The purpose of multi-threading is to leverage all the cores available for the calculation. Each thread can run in parallel --> Multi-threading. 
+- Python in particular has the problem of global interpreter loc --> All the threads wants the loc, and only one is using it, so all the threads are awaiting for thread 1 to release it so the others can do their job. 
+- Nevertheless, some libraries release the global interpreter loc (f.eg. numpy). In this case a multi-thread approach will perform much better than a processes computation. 
+- Doing computations with processes can be beneficial in some tasks. 
+
+the dask.compute() function allows for choosing between using threads or processes when performing a task in python, as showed in the jupyter notebook: threads_vs_processes part 4. CPU-Bound Task and part 5. I/O Bound Task.
+
+
+--- Numba Basics library ---
+
+- It compiles our python functions and speeds them up inside the python code: Uses C++ tools to transform our python functions into machine code-compiled functions, making them more efficient (as if we're using C++) --> It gives a C++ speed to Python functions.
+
+- Speaker recommends to use Numba to optimize only the computationally heavy tasks within our python code.
+
+- Namba is called by only putting @jit up where the function is defined (See 0_basics.ipynb). 
+
+- We can do @jit on functions that inside use already optimized (@jit) functions. 
+
+- Numba also reduces the memory usage compared to a python function. 
+
+--- Multithreading with Numba ---
+
+- The goal is to release the global interpreter loc. But Numba can also do multithreading for us (run in parallel).
+
+- To parallelize with Numba do @jit(parallel=True) up to where the function is defined (see 2_threads.ipynb). 
+
+If we wanna use all the cores
+
+OMP_NUM_THREADS --> it specifies the number of cores that we are gonna use to make parallel calculations. Typically, if the parallelization in our code is of 100%, this flag is set as the total number of cores requested and available for the calculation. 
+
+--- DASK ---
+
+- Gives us the capability of running on multiple nodes (1 node is made of 128 CPUs in EXPANSE). 
+
+

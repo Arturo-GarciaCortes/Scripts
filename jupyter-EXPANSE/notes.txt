@@ -1,0 +1,58 @@
+Run jupyter notebooks anywhere to scale up projects from Laptop to expanse!!
+
+To do it we have to:
+1. Set up a reproducible and portable environment. 
+2. Run jupyter Lab on expanse. 
+3. Scale up calculations on CPU/GPU (this allows us to use multiple cores).
+4. Run jupyter lab in batch.
+
+--- 1. Set up a reproducible and portable environment (Python) ---
+
+- It is very important to ensure reproducibility for computer code. 
+- There are two ways to set and manage a reproducible environment: Conda and Singularity. The difference is that Singularity allows to also port the OS and permits multi-node computing. In contrast, Conda only allows for using one node.    
+- Conda: Is a package/environment management system that installs, run and updates open source packages and their dependencies, while checking compatibility with all preexisting packages. It allows us to create, save, load and switch between multiple environments in our local computer, as well as share instructions of how to recreate that environment on a different computer. 
+- By creating conda environments, multiple versions of software packages can co-exists without interference. They will be portable and can be installed on multiple platforms. 
+
+- To define a Conda environment:
+	1. Create a environment.yml file. An example of it can be found in the directory df-parallel/. 
+		- The name should be the same as the github repo. 
+		- The channels section specifies where to look for packages. Order matters. The conda-forge channel has newer versions than anaconda. 
+		- Dependencies should have their pin specified, which stands for the version number and ensure reproducibility and compatibility.
+		- We can also set environment variables (f.eg. configuration options).
+	2. Local Machine.
+		- Create the conda environment using the command: conda env -f environment.yml --> local machine
+		- Activate the conda env: conda activate <environment_name>
+		- When finish our work, deactivate the environment: conda deactivate
+	2.1 EXPANSE 
+		- Create the conda environment using the galyleo script
+	
+--- 2. Run jupyter lab on expanse ---
+
+1. As mentioned previously, we need the galyleo script in order to set up our conda environment in EXPANSE. Hence, first we need to put galyleo to our path by using:
+	export PATH="/cm/shared/apps/sdsc/galyleo:${PATH}"
+2. Then launch our jupyter notebook using the galyleo script which specifies calculations setting and the environment.yml file:
+galyleo launch --account <account_number> --partition shared --cpus <number of CPUs> --memory <memory_in_Gbs> --time-limit 00:00:00 --conda-env <name_of_conda_environment> --conda-yml "${HOME}/path/to/environment.yml" --mamba
+3. Finally, we copy and paste the generated URL into our web browser. 
+
+- Extra notes:
+	- To run Jupyter notebooks that require CPUs we have to choose the shared partition.
+	- To run Jupyter notebooks that require GPUs we choose the gpu-shared partition. 
+	
+--- 3. Scale up calculations using CPU/GPU ---
+
+- Scaling with CPU/GPU allows for processing large datasets. However, we cannot use Pandas to do parallel or out-of-core computations. Instead, we have to occupy Dask/py-Spark (CPU) or cuDF/Dask-cuDF (GPU) for these kind of parallel tasks.  
+
+- If we want to run jupyter on CPU using Pandas, Dask or Spark to read and manipulate large dataframes, we can use the galyleo script showed previously. 
+- If we want to run jupyter on GPU using Pandas, Dask, Spark, cuDF or Dask-cuDF to process and manipulate large dataframes, we use a modified version of the galyleo script:
+galyleo launch --account <account_number> --partition gpu-shared --cpus <number of CPUs> --memory <memory_in_Gbs> --gpus <number_of_gpus> --time-limit 00:00:00 --conda-env <name_of_conda_environment> --conda-yml "${HOME}/path/to/environment.yml" --mamba 
+
+- Extra notes:
+- See the examples in the directory df-repo to see how to implement DataFrame processing and manipulation with Pandas, Dask, Spark, cuDF, etc. 
+- At the end, all other packages, specially those working with GPUs outperformed Pandas by approximately 4 times in reading, processing and manipulating data from the genes data frames. 
+- The sintaxes bewteen pandas and some of the other tools such as Dask, cuDF, etc. are the same or very similar. 
+- If the size of the dataframe is larger than the memory per GPU or CPU allowed (out-of-memory issue), we have to use Spark and Dask (CPU) or Dask-cuDF (GPU)
+- The recommended workflow for jupyer notebooks in EXPANSE is:
+	1. Work on the notebooks and the environment in a local machine.
+	2. Upload them to a github repository
+	3. Go to EXPANSE and clone the github repository.
+	4. Activate the environment and launch jupyer lab with galyleo. Do the work.

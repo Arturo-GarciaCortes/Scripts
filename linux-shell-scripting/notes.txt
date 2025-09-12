@@ -1,0 +1,38 @@
+Linux Shell Scripting
+
+---- 1. What's a Shell ----
+Is a command line interpreter. Allows us to interact with the OS by writting commands and excecuting them. 
+
+There're different types of shells. HCP clusters work with a Bash shell, as they are based on Linux (linux opperates with bash shell)
+
+---- 2. What's a Shell script ----
+-Shell scripts are programs that are executed by the Linux shell. A shell script file contains a sequaence of commands that are executed by the shell program line by line. They can contain comments, simple commands and programming constructs for loops, branches, variable assignment. 
+
+- Shell scripts allow us to do file navigation, file creation, and launching processes. 
+
+- Any command than I run in the command line can be added to a Shell script. i
+
+- Shell scripts allow to automate routine tasks, such as backups, monitor system resources, system set up, etc., and importantly, automate workflows in either local machines or HPC systems, which work with cron jobs. 
+
+---- 3. Bash Scripting ----
+
+- Shell scripts usually are named to en with .sh
+
+- The first line in a .sh script must define the shell that will be used. For example:
+	#!/usr/bin/env bash
+
+- All lines that start with # are comments, and not excecuted, but not necessarirly ignored (f.eg. #!)
+
+- To define a variable:
+	VariableName=Value #No spaces are allowed bewteen variable and value
+	VariableName=Value2 #Changing the value of the variable
+	echo $VariableName #Retrieving the variable value
+
+- If the variable is a string:
+	var="Banana"
+
+- If we don't define the type of variable (local/global), it will be global. To define a global variable we have to specify it:
+	- local var2="apple"
+
+
+
