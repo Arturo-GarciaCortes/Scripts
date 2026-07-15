@@ -1,0 +1,75 @@
+Install a customized version of Quantum ESPRESSO in EXPANSE enabling FFT, SCALAPACK, ELPA, etc... and linking it with Libxc which allows to chamge functional parameters and has the Fermi hole curvature enforcement feature switched off by adding the --disable-fhc flag when compilingit.
+
+1. Login into expanse and request an interactive sesion for using a compute node.-
+
+srun --partition=shared --pty --account=unl108 --nodes=1 --ntasks-per-node=16 --mem=32G -t 02:00:00 --wait=0 /bin/bash
+
+2. Once the sesion has been allocated, enable the optimized libraries installed for the QE version of Marty by typying.-
+
+module reset
+module use /cm/shared/apps/spack/0.21.2/cpu/a/share/spack/lmod/linux-rocky8-x86_64/Core
+
+3. Then, load the following modules (libraries) using the "module load <module>" command.-
+
+  1) shared                       9) openmpi/4.1.8/4lddjgq
+  2) cpu/0.17.3b            (c)  10) openblas/0.3.28/nhdtzub
+  3) slurm/expanse/23.02.7       11) netlib-scalapack/2.2.0/6bj2tb7
+  4) sdsc/1.0                    12) elpa/2024.03.001/gthoikc
+  5) DefaultModules              13) fftw/3.3.10/7fwlssg
+  6) gcc/13.3.0/t46rsdv          14) hdf5/1.14.3/zhdd6nr
+  7) hwloc/2.9.1/raenanb         
+  8) ucx/1.14.1/npuqcqj-omp      
+
+- Note that modules 1,2,3,4 and 5 are loaded automatically when logging into EXPANSE
+
+4. Install libxc
+
+	- Enable functional parameter tunning by uncomenting the get_ext_param function within the /src/util.c file before configuring.
+	- Follow these instructions:
+
+	   4.1 Download libxc in you local machine and create the configure files by running autoreconf -i inside the main libxc folder
+	   4.2 Upload the libxc-X.X.X folder with the configure files to your home directory in EXPANSE
+	   4.3 Inside the libxc-X.X.X folder run: ./configure --disable-fhc --prefix=/path/to/libxc
+	   4.4 Inside the libxc-X.X.X folder do: make
+	   4.4 Inside the libxc-X.X.X folder do: make install
+	   4.6 Create a copy of the xc_version.h file and paste it into the libxc/ folder where the include, lib and bin folders are. 
+
+5. Install Quantum ESPRESSO
+	
+	5.1 Verify that the library paths are available by running.-
+
+	echo $OPENBLAS_ROOT
+	echo $NETLIB_SCALAPACK_ROOT
+	echo $FFTW_ROOT
+	echo $ELPA_ROOT
+
+	If the outputs are something similar to: 
+	/cm/shared/apps/spack/0.21.2/cpu/a/opt/spack/.../openblas-0.3.28-...
+	/cm/shared/apps/spack/0.21.2/cpu/a/opt/spack/.../netlib-scalapack-2.2.0-...
+	/cm/shared/apps/spack/0.21.2/cpu/a/opt/spack/.../fftw-3.3.10-...
+	/cm/shared/apps/spack/0.21.2/cpu/a/opt/spack/.../elpa-2024.03.001-...
+
+	Then we can proceed
+
+	5.1 Run ./configure with explicit library paths:
+
+./configure \
+MPIF90=mpif90 \
+F90=mpif90 \
+CC=mpicc \
+--enable-parallel \
+BLAS_LIBS="-L${OPENBLAS_ROOT}/lib -lopenblas" \
+LAPACK_LIBS="-L${OPENBLAS_ROOT}/lib -lopenblas" \
+SCALAPACK_LIBS="-L${NETLIB_SCALAPACK_ROOT}/lib -lscalapack"
+
+	5.3 Link QE with libxc by adding the corresponding flags within the generated make.inc file
+
+	5.4 Add -I${FFTW_ROOT}/include to IFLAGS within the make.inc file so that QE succesfully detects FFTW library 
+
+	5.2 Compile QE:
+
+	make all
+	
+-------------------------------------------------------------------------------------------------------------------------------------------------
+								THE END
+-------------------------------------------------------------------------------------------------------------------------------------------------
